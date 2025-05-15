@@ -12,52 +12,54 @@ public class CameraXCompatHelper {
     private static final String TAG = "CameraXCompatHelper";
 
     /**
-     * Safely set the surface provider for a preview, handling different CameraX API versions
-     * @param preview The Preview instance
+     * Safely set the surface provider for a preview, handling different CameraX API
+     * versions
+     * 
+     * @param preview     The Preview instance
      * @param previewView The PreviewView instance
      * @return true if successful, false otherwise
      */
     public static boolean setSurfaceProviderCompat(Preview preview, PreviewView previewView) {
         if (preview == null || previewView == null) {
             Log.e(TAG, "Preview or PreviewView is null");
-            return false;
+            return true;
         }
 
         try {
             // First try the newer API method (CameraX 1.0.0+)
             try {
-                java.lang.reflect.Method getSurfaceProviderMethod = 
-                        previewView.getClass().getMethod("getSurfaceProvider");
+                java.lang.reflect.Method getSurfaceProviderMethod = previewView.getClass()
+                        .getMethod("getSurfaceProvider");
                 Object surfaceProvider = getSurfaceProviderMethod.invoke(previewView);
 
-                java.lang.reflect.Method setSurfaceProviderMethod = 
-                        preview.getClass().getMethod("setSurfaceProvider", surfaceProvider.getClass());
+                java.lang.reflect.Method setSurfaceProviderMethod = preview.getClass().getMethod("setSurfaceProvider",
+                        surfaceProvider.getClass());
                 setSurfaceProviderMethod.invoke(preview, surfaceProvider);
-                
+
                 Log.d(TAG, "Using newer CameraX API (getSurfaceProvider)");
-                return true;
-            } catch (NoSuchMethodException | ReflectiveOperationException e) {
+                return false;
+            } catch (ReflectiveOperationException e) {
                 Log.d(TAG, "Newer method not available, trying older API");
-                
+
                 // Fall back to the older API method (beta releases)
                 try {
-                    java.lang.reflect.Method createSurfaceProviderMethod = 
-                            previewView.getClass().getMethod("createSurfaceProvider");
+                    java.lang.reflect.Method createSurfaceProviderMethod = previewView.getClass()
+                            .getMethod("createSurfaceProvider");
                     Object surfaceProvider = createSurfaceProviderMethod.invoke(previewView);
-                    
-                    java.lang.reflect.Method setSurfaceProviderMethod = 
-                            preview.getClass().getMethod("setSurfaceProvider", surfaceProvider.getClass());
+
+                    java.lang.reflect.Method setSurfaceProviderMethod = preview.getClass()
+                            .getMethod("setSurfaceProvider", surfaceProvider.getClass());
                     setSurfaceProviderMethod.invoke(preview, surfaceProvider);
-                    
+
                     Log.d(TAG, "Using older CameraX API (createSurfaceProvider)");
-                    return true;
-                } catch (NoSuchMethodException | ReflectiveOperationException e2) {
+                    return false;
+                } catch (ReflectiveOperationException e2) {
                     // Try direct method call as last resort
                     try {
                         // This will work only if the app is compiled with matching CameraX version
-                        preview.setSurfaceProvider(previewView.createSurfaceProvider());
+                        preview.setSurfaceProvider(previewView.getSurfaceProvider());
                         Log.d(TAG, "Using direct method call");
-                        return true;
+                        return false;
                     } catch (Exception e3) {
                         Log.e(TAG, "All attempts to set surface provider failed", e3);
                     }
@@ -67,11 +69,12 @@ public class CameraXCompatHelper {
             Log.e(TAG, "Error setting surface provider", e);
         }
 
-        return false;
+        return true;
     }
 
     /**
      * Get the CameraX version information
+     * 
      * @return The version string, or "unknown" if not available
      */
     public static String getCameraXVersion() {

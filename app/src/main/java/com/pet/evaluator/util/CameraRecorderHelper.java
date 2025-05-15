@@ -27,39 +27,42 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
 /**
- * Enhanced camera recorder utility to gracefully handle recording in different Android versions
+ * Enhanced camera recorder utility to gracefully handle recording in different
+ * Android versions
  */
 public class CameraRecorderHelper {
     private static final String TAG = "CameraRecorderHelper";
 
     public interface RecordingCallback {
         void onVideoRecordingStarted();
+
         void onVideoRecordingSuccess(Uri videoUri);
+
         void onVideoRecordingFailure(String errorMessage);
     }
 
     /**
-     * Safely start video recording with appropriate error handling for different Android versions
+     * Safely start video recording with appropriate error handling for different
+     * Android versions
      *
-     * @param activity Activity context
+     * @param activity       Activity context
      * @param lifecycleOwner The lifecycle owner
      * @param cameraSelector Which camera to use (front/back)
-     * @param callback Callback for recording events
+     * @param callback       Callback for recording events
      * @return true if recording started successfully, false otherwise
      */
     @SuppressWarnings("deprecation") // For compatibility with older Android versions
     public static boolean startVideoRecording(@NonNull Activity activity,
-                                           @NonNull LifecycleOwner lifecycleOwner,
-                                           @NonNull CameraSelector cameraSelector,
-                                           @NonNull RecordingCallback callback) {
+            @NonNull LifecycleOwner lifecycleOwner,
+            @NonNull CameraSelector cameraSelector,
+            @NonNull RecordingCallback callback) {
         if (activity == null || activity.isFinishing()) {
             Log.e(TAG, "Cannot start recording: activity is null or finishing");
             return false;
         }
 
         try {
-            ListenableFuture<ProcessCameraProvider> cameraProviderFuture =
-                    ProcessCameraProvider.getInstance(activity);
+            ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(activity);
 
             ProcessCameraProvider cameraProvider;
             try {
@@ -68,12 +71,12 @@ public class CameraRecorderHelper {
                 Log.e(TAG, "Failed to get camera provider", e);
                 callback.onVideoRecordingFailure("Failed to initialize camera provider: " + e.getMessage());
                 return false;
-            }            // Prepare video capture use case with quality settings
+            } // Prepare video capture use case with quality settings
             int width = activity.getResources().getInteger(R.integer.video_quality_medium_resolution_width);
             int height = activity.getResources().getInteger(R.integer.video_quality_medium_resolution_height);
             int bitRate = activity.getResources().getInteger(R.integer.video_bitrate_medium);
             int frameRate = activity.getResources().getInteger(R.integer.video_fps);
-            
+
             VideoCapture videoCapture = new VideoCapture.Builder()
                     .setTargetRotation(activity.getWindowManager().getDefaultDisplay().getRotation())
                     .setVideoFrameRate(frameRate)
@@ -98,8 +101,8 @@ public class CameraRecorderHelper {
             }
 
             // Prepare output options
-            VideoCapture.OutputFileOptions outputFileOptions =
-                    new VideoCapture.OutputFileOptions.Builder(videoFile).build();
+            VideoCapture.OutputFileOptions outputFileOptions = new VideoCapture.OutputFileOptions.Builder(videoFile)
+                    .build();
 
             // Start recording
             videoCapture.startRecording(
@@ -133,14 +136,16 @@ public class CameraRecorderHelper {
 
     /**
      * Create a file to store the video
+     * 
      * @param context Context
      * @return The created file or null if failed
      */
     private static File createVideoFile(Context context) {
         try {
-            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(System.currentTimeMillis());
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+                    .format(System.currentTimeMillis());
             String videoFileName = "VIDEO_" + timeStamp + "_";
-            
+
             File storageDir;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 // For Android 10 and above, use app-specific directory
@@ -148,14 +153,14 @@ public class CameraRecorderHelper {
             } else {
                 // For older versions
                 storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
-                
+
                 // Ensure directory exists
                 if (!storageDir.exists() && !storageDir.mkdirs()) {
                     Log.e(TAG, "Failed to create directory for video");
                     return null;
                 }
             }
-            
+
             return File.createTempFile(videoFileName, ".mp4", storageDir);
         } catch (Exception e) {
             Log.e(TAG, "Error creating video file", e);
@@ -165,6 +170,7 @@ public class CameraRecorderHelper {
 
     /**
      * Check if device supports the minimal camera features needed
+     * 
      * @param context Context
      * @return true if supported, false otherwise
      */
@@ -174,15 +180,15 @@ public class CameraRecorderHelper {
             Log.e(TAG, "Device does not have a camera");
             return false;
         }
-        
+
         // Check for camera2 API support
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
                 !context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_LEVEL_FULL)) {
             // Camera2 API with FULL support is preferred but not required
             Log.w(TAG, "Device does not support Camera2 API FULL level");
             // Continue anyway as CameraX might still work
         }
-        
+
         return true;
     }
 }

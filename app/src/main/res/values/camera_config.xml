@@ -5,7 +5,26 @@
     <integer name="video_quality_high_resolution_height">720</integer>
     <integer name="video_quality_medium_resolution_width">640</integer>
     <integer name="video_quality_medium_resolution_height">480</integer>
+    <integer name="video_quality_low_resolution_width">320</integer>
+    <integer name="video_quality_low_resolution_height">240</integer>
+    
+    <!-- Video encoding bitrates -->
     <integer name="video_bitrate_high">2500000</integer> <!-- 2.5 Mbps -->
     <integer name="video_bitrate_medium">1500000</integer> <!-- 1.5 Mbps -->
+    <integer name="video_bitrate_low">800000</integer> <!-- 0.8 Mbps -->
     <integer name="video_fps">30</integer>
+    <integer name="video_fps_low">24</integer>
+    
+    <!-- Video recording settings -->
+    <integer name="max_recording_duration_seconds">120</integer> <!-- 2 minutes -->
+    <integer name="min_recording_duration_seconds">10</integer> <!-- Minimum 10 seconds -->
+    
+    <!-- Camera selection preferences -->
+    <bool name="prefer_front_camera">true</bool>
+    <string name="preferred_video_encoder">DEFAULT</string> <!-- Options: DEFAULT, H264, H265 -->
+    
+    <!-- Diagnostics settings -->
+    <bool name="show_diagnostics_on_error">true</bool>
+    <bool name="log_camera_details">true</bool>
+    <integer name="camera_error_threshold_count">3</integer>
 </resources>

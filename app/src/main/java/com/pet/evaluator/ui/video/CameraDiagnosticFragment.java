@@ -46,29 +46,31 @@ public class CameraDiagnosticFragment extends Fragment {
     private PreviewView previewView;
     private TextView diagnosticText;
     private Button switchCameraButton;
-    private Button testButton;    private int currentCameraFacing = CameraSelector.LENS_FACING_FRONT;
-    
+    private Button testButton;
+    private int currentCameraFacing = CameraSelector.LENS_FACING_FRONT;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_camera_diagnostic, container, false);
     }
-    
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Initialize views        previewView = view.findViewById(R.id.diagnostic_preview_view);
+        // Initialize views previewView =
+        // view.findViewById(R.id.diagnostic_preview_view);
         diagnosticText = view.findViewById(R.id.text_diagnostic_info);
         switchCameraButton = view.findViewById(R.id.button_switch_camera);
         testButton = view.findViewById(R.id.button_test_camera);
-        
+
         // Initial diagnostic info
         updateDiagnosticText("Camera Diagnostic Tool\n\nInitializing...\n\n" +
-                             "CameraX compatibility mode: " + 
-                             (CameraXCompatHelper.getCameraXVersion().equals("unknown") ? 
-                                "Runtime detection" : "Version " + CameraXCompatHelper.getCameraXVersion()));
+                "CameraX compatibility mode: " +
+                (CameraXCompatHelper.getCameraXVersion().equals("unknown") ? "Runtime detection"
+                        : "Version " + CameraXCompatHelper.getCameraXVersion()));
 
         // Set up button listeners
         switchCameraButton.setOnClickListener(v -> {
@@ -79,7 +81,7 @@ public class CameraDiagnosticFragment extends Fragment {
         });
 
         testButton.setOnClickListener(v -> runCameraDiagnostics());
-        
+
         // Add a way to get back to the video screen
         view.setOnLongClickListener(v -> {
             requireActivity().getSupportFragmentManager().popBackStack();
@@ -115,16 +117,16 @@ public class CameraDiagnosticFragment extends Fragment {
     }
 
     private void bindCameraPreview(ProcessCameraProvider cameraProvider) {
-        cameraProvider.unbindAll();        // Set up the camera selector
+        cameraProvider.unbindAll(); // Set up the camera selector
         CameraSelector cameraSelector = new CameraSelector.Builder()
                 .requireLensFacing(currentCameraFacing)
                 .build();
-                
+
         // Set up the preview
         Preview preview = new Preview.Builder().build();
-        
+
         // Use our compatibility helper to set the surface provider
-        if (!CameraXCompatHelper.setSurfaceProviderCompat(preview, previewView)) {
+        if (CameraXCompatHelper.setSurfaceProviderCompat(preview, previewView)) {
             Log.e(TAG, "Failed to set surface provider using compatibility helper");
             updateDiagnosticText("Failed to set up camera preview");
         }
@@ -183,7 +185,8 @@ public class CameraDiagnosticFragment extends Fragment {
                             break;
                         default:
                             facingText = "UNKNOWN";
-                    }                    diagnosticInfo.append("Camera ID ").append(cameraId)
+                    }
+                    diagnosticInfo.append("Camera ID ").append(cameraId)
                             .append(": ").append(facingText).append("\n");
                 }
             }
@@ -191,10 +194,11 @@ public class CameraDiagnosticFragment extends Fragment {
             diagnosticInfo.append("❌ Error accessing camera: ").append(e.getMessage()).append("\n");
             Log.e(TAG, "Error accessing camera", e);
         }
-        
+
         // Check CameraX version
         try {
-            // Try to get CameraX version through reflection to avoid direct BuildConfig reference
+            // Try to get CameraX version through reflection to avoid direct BuildConfig
+            // reference
             Class<?> buildConfigClass = Class.forName("androidx.camera.core.BuildConfig");
             java.lang.reflect.Field versionField = buildConfigClass.getField("VERSION_NAME");
             String version = (String) versionField.get(null);

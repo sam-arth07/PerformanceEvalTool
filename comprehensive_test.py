@@ -188,7 +188,7 @@ def test_video_upload(api_url):
     try:
         import numpy as np
         from PIL import Image
-        
+
         # Generate a very small mock video file (just a few bytes)
         # This is just to test the API connectivity without sending large files
         test_file_path = "test_unity_pixel.mp4"

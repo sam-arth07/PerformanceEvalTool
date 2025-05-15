@@ -4,14 +4,15 @@ Camera and Video Processing Test Script for PET
 This will test video upload and analysis functions
 """
 
+import argparse
+import json
+import logging
 import os
 import sys
-import argparse
-import requests
 import time
-import json
 from concurrent.futures import ThreadPoolExecutor
-import logging
+
+import requests
 
 # Set up logging
 logging.basicConfig(

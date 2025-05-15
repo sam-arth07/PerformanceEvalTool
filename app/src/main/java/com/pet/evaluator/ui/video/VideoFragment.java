@@ -1,11 +1,11 @@
 package com.pet.evaluator.ui.video;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import java.io.File;
 import android.os.CountDownTimer;
@@ -31,7 +31,6 @@ import androidx.camera.core.CameraSelector;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -45,7 +44,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-public class VideoFragment extends Fragment {    private static final int REQUEST_CODE_PERMISSIONS = PermissionManager.REQUEST_CODE_CAMERA_PERMISSIONS;
+public class VideoFragment extends Fragment {
+    private static final int REQUEST_CODE_PERMISSIONS = PermissionManager.REQUEST_CODE_CAMERA_PERMISSIONS;
     private static final int PICK_VIDEO_FILE = 2;
 
     private VideoViewModel videoViewModel;
@@ -84,7 +84,7 @@ public class VideoFragment extends Fragment {    private static final int REQUES
         progressBar = view.findViewById(R.id.progress_video);
 
         // Log camera information for debugging
-        CameraUtils.logCameraInfo(requireContext());        // Set click listeners
+        CameraUtils.logCameraInfo(requireContext()); // Set click listeners
         recordButton.setOnClickListener(v -> {
             if (isRecording) {
                 stopRecording();
@@ -95,7 +95,8 @@ public class VideoFragment extends Fragment {    private static final int REQUES
                     } else {
                         Toast.makeText(requireContext(), "This device doesn't have a camera!",
                                 Toast.LENGTH_LONG).show();
-                    }                } else {
+                    }
+                } else {
                     // Use our PermissionManager to request permissions
                     PermissionManager.checkAndRequestCameraPermissions(
                             this,
@@ -105,11 +106,11 @@ public class VideoFragment extends Fragment {    private static final int REQUES
                                 public void onPermissionsGranted() {
                                     startRecording();
                                 }
-                                
+
                                 @Override
                                 public void onPermissionsDenied(List<String> deniedPermissions) {
-                                    Toast.makeText(requireContext(), 
-                                            "Camera and/or audio permissions denied", 
+                                    Toast.makeText(requireContext(),
+                                            "Camera and/or audio permissions denied",
                                             Toast.LENGTH_SHORT).show();
                                 }
                             },
@@ -117,7 +118,7 @@ public class VideoFragment extends Fragment {    private static final int REQUES
                 }
             }
         });
-        
+
         // Add long press listener for diagnostic mode
         recordButton.setOnLongClickListener(v -> {
             showCameraDiagnosticFragment();
@@ -162,7 +163,9 @@ public class VideoFragment extends Fragment {    private static final int REQUES
         if (allPermissionsGranted()) {
             startCamera();
         }
-    }    private void startCamera() {
+    }
+
+    private void startCamera() {
         try {
             // Make previewView visible and videoPreviewImageView invisible
             previewView.setVisibility(View.VISIBLE);
@@ -177,21 +180,21 @@ public class VideoFragment extends Fragment {    private static final int REQUES
             // Check permissions with our enhanced permission manager
             if (!PermissionManager.hasCameraPermissions(requireContext(), false)) {
                 PermissionManager.checkAndRequestCameraPermissions(
-                    this, 
-                    REQUEST_CODE_PERMISSIONS,
-                    new PermissionManager.PermissionCallback() {
-                        @Override
-                        public void onPermissionsGranted() {
-                            // Try again after permissions are granted
-                            startCamera();
-                        }
-                        
-                        @Override
-                        public void onPermissionsDenied(List<String> deniedPermissions) {
-                            handleCameraError("Camera permissions required");
-                        }
-                    },
-                    false // Just camera permission for preview, no audio needed
+                        this,
+                        REQUEST_CODE_PERMISSIONS,
+                        new PermissionManager.PermissionCallback() {
+                            @Override
+                            public void onPermissionsGranted() {
+                                // Try again after permissions are granted
+                                startCamera();
+                            }
+
+                            @Override
+                            public void onPermissionsDenied(List<String> deniedPermissions) {
+                                handleCameraError("Camera permissions required");
+                            }
+                        },
+                        false // Just camera permission for preview, no audio needed
                 );
                 return;
             }
@@ -225,14 +228,15 @@ public class VideoFragment extends Fragment {    private static final int REQUES
         } catch (Exception e) {
             handleCameraError("Camera initialization error: " + e.getMessage());
 
-            // Show troubleshooting tips            // Use our enhanced troubleshooting utility
+            // Show troubleshooting tips // Use our enhanced troubleshooting utility
             CameraTroubleshooter.showTroubleshootingDialog(requireActivity());
         }
     }
 
     /**
      * Handle camera errors with logging and user feedback
-     */    private void handleCameraError(String message) {
+     */
+    private void handleCameraError(String message) {
         Log.e("VideoFragment", message);
         Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
 
@@ -240,28 +244,29 @@ public class VideoFragment extends Fragment {    private static final int REQUES
         if (uploadButton != null) {
             uploadButton.setEnabled(true);
         }
-        
+
         // Show diagnostic button if multiple errors occur
         if (message.contains("Failed") || message.contains("Error")) {
             showDiagnosticButton();
         }
     }
-    
+
     private void showDiagnosticButton() {
         // Create a floating action button for diagnostics
         View view = getView();
-        if (view == null) return;
-        
+        if (view == null)
+            return;
+
         // Check if we already have a diagnostic button
         if (view.findViewById(R.id.button_camera_diagnostic) != null) {
             return;
         }
-        
+
         Button diagnosticButton = new Button(requireContext());
         diagnosticButton.setId(R.id.button_camera_diagnostic); // Define this ID in a resource file
         diagnosticButton.setText("Camera Diagnostic");
         diagnosticButton.setOnClickListener(v -> showCameraDiagnosticFragment());
-        
+
         // Add to layout
         ViewGroup layout = (ViewGroup) view;
         layout.addView(diagnosticButton);
@@ -273,8 +278,8 @@ public class VideoFragment extends Fragment {    private static final int REQUES
 
             CameraSelector cameraSelector = new CameraSelector.Builder()
                     .requireLensFacing(CameraSelector.LENS_FACING_FRONT)
-                    .build();            // Use our compatibility helper to handle different CameraX versions
-            if (!CameraXCompatHelper.setSurfaceProviderCompat(preview, previewView)) {
+                    .build(); // Use our compatibility helper to handle different CameraX versions
+            if (CameraXCompatHelper.setSurfaceProviderCompat(preview, previewView)) {
                 handleCameraError("Failed to set up camera preview");
             }
 
@@ -287,17 +292,21 @@ public class VideoFragment extends Fragment {    private static final int REQUES
             Log.e("VideoFragment", "Error binding preview: " + e.getMessage());
             Toast.makeText(getContext(), "Error binding camera preview: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
-    }    private boolean allPermissionsGranted() {
+    }
+
+    private boolean allPermissionsGranted() {
         return PermissionManager.hasCameraPermissions(requireContext(), true); // Include audio
-    }private void startRecording() {
+    }
+
+    private void startRecording() {
         // Use our enhanced camera recorder helper
         CameraSelector cameraSelector = new CameraSelector.Builder()
                 .requireLensFacing(CameraSelector.LENS_FACING_FRONT)
                 .build();
-        
+
         // Show progress during recording initialization
         progressBar.setVisibility(View.VISIBLE);
-        
+
         CameraRecorderHelper.startVideoRecording(
                 requireActivity(),
                 getViewLifecycleOwner(),
@@ -309,13 +318,15 @@ public class VideoFragment extends Fragment {    private static final int REQUES
                         isRecording = true;
                         recordButton.setText("Stop Recording");
                         progressBar.setVisibility(View.GONE);
-                        
+
                         // Start a timer for recording
                         recordingTimer = new CountDownTimer(MAX_RECORDING_TIME, 1000) {
                             @Override
                             public void onTick(long millisUntilFinished) {
-                                long seconds = TimeUnit.MILLISECONDS.toSeconds(MAX_RECORDING_TIME - millisUntilFinished) % 60;
-                                long minutes = TimeUnit.MILLISECONDS.toMinutes(MAX_RECORDING_TIME - millisUntilFinished);
+                                long seconds = TimeUnit.MILLISECONDS.toSeconds(MAX_RECORDING_TIME - millisUntilFinished)
+                                        % 60;
+                                long minutes = TimeUnit.MILLISECONDS
+                                        .toMinutes(MAX_RECORDING_TIME - millisUntilFinished);
                                 timerTextView.setText(String.format("%02d:%02d", minutes, seconds));
                             }
 
@@ -333,14 +344,14 @@ public class VideoFragment extends Fragment {    private static final int REQUES
                         if (recordingTimer != null) {
                             recordingTimer.cancel();
                         }
-                        
+
                         // Process the recorded video
                         isRecording = false;
                         recordButton.setText(R.string.record_video);
-                        
+
                         // Process the video using our shared view model
                         sharedViewModel.processVideo(videoUri);
-                        
+
                         Toast.makeText(getContext(), "Recording saved successfully", Toast.LENGTH_SHORT).show();
                     }
 
@@ -349,18 +360,20 @@ public class VideoFragment extends Fragment {    private static final int REQUES
                         if (recordingTimer != null) {
                             recordingTimer.cancel();
                         }
-                        
+
                         isRecording = false;
                         recordButton.setText(R.string.record_video);
                         progressBar.setVisibility(View.GONE);
-                        
+
                         handleCameraError("Recording failed: " + errorMessage);
-                        
+
                         // Fall back to sample videos if available
                         fallbackToSampleVideos();
                     }
                 });
-    }    private void stopRecording() {
+    }
+
+    private void stopRecording() {
         // This method now only handles manual stopping of recording
         // The actual video saving is handled in the CameraRecorderHelper callback
         if (recordingTimer != null) {
@@ -369,17 +382,18 @@ public class VideoFragment extends Fragment {    private static final int REQUES
 
         isRecording = false;
         recordButton.setText(R.string.record_video);
-        
+
         // Since we don't have a direct reference to the VideoCapture use case here,
         // we need to get it through the camera provider
         try {
             ProcessCameraProvider cameraProvider = ProcessCameraProvider.getInstance(requireContext()).get();
             cameraProvider.unbindAll(); // This will stop the recording
-            
+
             // Rebind preview to keep camera preview running
             startCamera();
-            
-            // Fall back to sample videos since we can't easily get the recorded video this way
+
+            // Fall back to sample videos since we can't easily get the recorded video this
+            // way
             fallbackToSampleVideos();
         } catch (Exception e) {
             Log.e("VideoFragment", "Error stopping recording: " + e.getMessage());
@@ -387,7 +401,7 @@ public class VideoFragment extends Fragment {    private static final int REQUES
             fallbackToSampleVideos();
         }
     }
-    
+
     private void fallbackToSampleVideos() {
         // For demo or fallback scenarios, use a real sample video file
         Uri videoUri;
@@ -417,14 +431,16 @@ public class VideoFragment extends Fragment {    private static final int REQUES
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("video/*");
         startActivityForResult(intent, PICK_VIDEO_FILE);
-    }    @Override
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
             @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        
+
         // Use our PermissionManager to handle permission results
         PermissionManager.handlePermissionResult(requestCode, permissions, grantResults);
-        
+
         // Additional UI and behavior specific to this fragment
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             if (allPermissionsGranted()) {
@@ -434,13 +450,13 @@ public class VideoFragment extends Fragment {    private static final int REQUES
                 // Format denied permissions for better error messages
                 StringBuilder deniedPermissions = new StringBuilder();
                 for (String permission : permissions) {
-                    if (ContextCompat.checkSelfPermission(requireContext(), permission) 
-                            != PackageManager.PERMISSION_GRANTED) {
+                    if (ContextCompat.checkSelfPermission(requireContext(),
+                            permission) != PackageManager.PERMISSION_GRANTED) {
                         deniedPermissions.append(permission.substring(permission.lastIndexOf(".") + 1))
                                 .append(", ");
                     }
                 }
-                
+
                 if (deniedPermissions.length() > 0) {
                     String message = "Required permissions not granted: " +
                             deniedPermissions.substring(0, deniedPermissions.length() - 2);
@@ -474,16 +490,18 @@ public class VideoFragment extends Fragment {    private static final int REQUES
                 Toast.makeText(getContext(), R.string.video_uploaded_success, Toast.LENGTH_SHORT).show();
             }
         }
-    }    @Override
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
-        
+
         // Check if device screen is on and activity is visible before starting camera
         if (!isResumed() || !getUserVisibleHint()) {
             Log.d("VideoFragment", "Fragment not fully visible, skipping camera start");
             return;
         }
-        
+
         if (allPermissionsGranted()) {
             // Start with a delay to ensure the view is fully initialized
             previewView.post(() -> {
@@ -495,27 +513,29 @@ public class VideoFragment extends Fragment {    private static final int REQUES
         } else {
             // Request permissions using our enhanced permission manager
             PermissionManager.checkAndRequestCameraPermissions(
-                this,
-                REQUEST_CODE_PERMISSIONS,
-                new PermissionManager.PermissionCallback() {
-                    @Override
-                    public void onPermissionsGranted() {
-                        startCamera();
-                    }
-                    
-                    @Override
-                    public void onPermissionsDenied(List<String> deniedPermissions) {
-                        Log.d("VideoFragment", "Camera permissions not granted");
-                        // Show troubleshooting dialog after a short delay
-                        new Handler().postDelayed(() -> 
-                            CameraTroubleshooter.showTroubleshootingDialog(requireActivity()),
-                            500);
-                    }
-                },
-                false // Just need camera for preview initially
+                    this,
+                    REQUEST_CODE_PERMISSIONS,
+                    new PermissionManager.PermissionCallback() {
+                        @Override
+                        public void onPermissionsGranted() {
+                            startCamera();
+                        }
+
+                        @Override
+                        public void onPermissionsDenied(List<String> deniedPermissions) {
+                            Log.d("VideoFragment", "Camera permissions not granted");
+                            // Show troubleshooting dialog after a short delay
+                            new Handler().postDelayed(
+                                    () -> CameraTroubleshooter.showTroubleshootingDialog(requireActivity()),
+                                    500);
+                        }
+                    },
+                    false // Just need camera for preview initially
             );
         }
-    }@Override
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
         // Clean up camera resources when fragment is paused
@@ -526,19 +546,19 @@ public class VideoFragment extends Fragment {    private static final int REQUES
             Log.e("VideoFragment", "Error unbinding camera use cases: " + e.getMessage());
         }
     }
-    
+
     /**
      * Show the camera diagnostic fragment for troubleshooting
      */
     private void showCameraDiagnosticFragment() {
         CameraDiagnosticFragment diagnosticFragment = new CameraDiagnosticFragment();
-        
+
         requireActivity().getSupportFragmentManager()
-            .beginTransaction()
-            .replace(R.id.nav_host_fragment, diagnosticFragment)
-            .addToBackStack("camera_diagnostic")
-            .commit();
-        
+                .beginTransaction()
+                .replace(R.id.nav_host_fragment, diagnosticFragment)
+                .addToBackStack("camera_diagnostic")
+                .commit();
+
         Toast.makeText(requireContext(), "Entering Camera Diagnostic Mode", Toast.LENGTH_SHORT).show();
     }
 }

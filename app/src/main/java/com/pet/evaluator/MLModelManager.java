@@ -55,7 +55,7 @@ interface MLModelApi {
  * Manager class for interfacing with Python ML models
  */
 public class MLModelManager {
-    private static final String TAG = "MLModelManager";    // API Base URL options
+    private static final String TAG = "MLModelManager"; // API Base URL options
     private static final String LOCAL_EMULATOR_URL = "http://10.0.2.2:5000/";
     private static final String LOCAL_DEVICE_URL = "http://127.0.0.1:5000/";
     // Make sure the URL has a trailing slash, which is required by Retrofit
@@ -87,7 +87,9 @@ public class MLModelManager {
         if (!useOfflineMode) {
             checkServerAvailabilityAsync();
         }
-    }    /**
+    }
+
+    /**
      * Set whether to use offline mode
      *
      * @param useOfflineMode true to use offline mode, false to use online mode
@@ -95,32 +97,19 @@ public class MLModelManager {
     public void setUseOfflineMode(boolean useOfflineMode) {
         // Save the preference
         getPreferences().edit().putBoolean("offline_mode_preferred", useOfflineMode).apply();
-        
-    /**
-     * Set whether to use local server instead of Render.com's server
-     * This is primarily for debugging and development purposes
-     *
-     * @param useLocalServer true to use local server (127.0.0.1 or 10.0.2.2), 
-     *                       false to use Render.com server
-     * @return true if the setting was applied and server was switched
-     */    public boolean setUseLocalServer(boolean useLocalServer) {
-        // Save the preference
-        getPreferences().edit().putBoolean("use_local_server", useLocalServer).apply();
 
-        // Only switch if we're in online mode
-        boolean useOfflineMode = getPreferences().getBoolean("offline_mode_preferred", false);
+        // Update the mode
         if (useOfflineMode) {
-            // No effect in offline mode
-            return false;
+            initializeOfflineMode();
         } else {
-            // Re-initialize with the new server setting
             initializeOnlineMode();
-            
+
             // Check if server is actually available
             checkServerAvailabilityAsync();
-            return true;
         }
-    }/**
+    }
+
+    /**
      * Get the server availability status
      *
      * @return true if the server is available, false otherwise
@@ -128,30 +117,31 @@ public class MLModelManager {
     public boolean isServerAvailable() {
         return isServerAvailable;
     }
-    
+
     /**
      * Set whether to use local server instead of Render.com's server
      * This is primarily for debugging and development purposes
      *
-     * @param useLocalServer true to use local server (127.0.0.1 or 10.0.2.2), 
+     * @param useLocalServer true to use local server (127.0.0.1 or 10.0.2.2),
      *                       false to use Render.com server
      * @return true if the setting was applied and server was switched
      */
     public boolean setUseLocalServer(boolean useLocalServer) {
         // Save the preference
-        getPreferences().edit().putBoolean("use_local_server", useLocalServer).apply();
-        
-        // Only switch if we're in online mode
-        if (!getPreferences().getBoolean("offline_mode_preferred", false)) {
+        getPreferences().edit().putBoolean("use_local_server", useLocalServer).apply(); // Only switch if we're in
+                                                                                        // online mode
+        boolean useOfflineMode = getPreferences().getBoolean("offline_mode_preferred", false);
+        if (useOfflineMode) {
+            // No effect in offline mode
+            return false;
+        } else {
             // Re-initialize with the new server setting
             initializeOnlineMode();
-            
+
             // Check if server is available
             checkServerAvailabilityAsync();
             return true;
         }
-        
-        return false;
     }
 
     /**
@@ -161,11 +151,13 @@ public class MLModelManager {
     private void initializeOnlineMode() {
         // Configure OkHttp client with longer timeouts but shorter connection timeout
         // Shorter connection timeout helps fail faster when server is down
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .connectTimeout(5, TimeUnit.SECONDS) // Shorter connection timeout
                 .readTimeout(60, TimeUnit.SECONDS)
                 .writeTimeout(60, TimeUnit.SECONDS)
-                .build();        // Try connecting to the remote Render.com server first as it's most reliable
+                .build(); 
+                
+        // Try connecting to the remote Render.com server first as it's most reliable
         // Fall back to local options if needed (for debugging or development)
         if (getPreferences().getBoolean("use_local_server", false)) {
             // For local development/testing
