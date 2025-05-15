@@ -56,9 +56,9 @@ interface MLModelApi {
  */
 public class MLModelManager {
     private static final String TAG = "MLModelManager"; // API Base URL options private static final String
-                                                        // LOCAL_EMULATOR_URL = "http://10.0.2.2:5000/";
+    // LOCAL_EMULATOR_URL = "http://10.0.2.2:5000/";
     private static final String LOCAL_DEVICE_URL = "http://127.0.0.1:5000/";
-    private static final String DEMO_URL = "https://pet-ml-api.onrender.com/"; // Render.com free tier URL
+    private static final String DEMO_URL = "https://pet-ml-api-sqwo.onrender.com"; // Render.com free tier URL
 
     // Current active URL - can be changed at runtime if needed
     private String currentBaseUrl;
@@ -90,7 +90,7 @@ public class MLModelManager {
 
     /**
      * Set whether to use offline mode
-     * 
+     *
      * @param useOfflineMode true to use offline mode, false to use online mode
      */
     public void setUseOfflineMode(boolean useOfflineMode) {
@@ -110,7 +110,7 @@ public class MLModelManager {
 
     /**
      * Get the server availability status
-     * 
+     *
      * @return true if the server is available, false otherwise
      */
     public boolean isServerAvailable() {
@@ -132,7 +132,8 @@ public class MLModelManager {
 
         // Try connecting to the most likely server URL first
         // For emulators, this is 10.0.2.2, for real devices it's usually 127.0.0.1
-        currentBaseUrl = isEmulator() ? LOCAL_EMULATOR_URL : LOCAL_DEVICE_URL;
+//        currentBaseUrl = isEmulator() ? LOCAL_EMULATOR_URL : LOCAL_DEVICE_URL;
+        currentBaseUrl = LOCAL_DEVICE_URL;
 
         Log.d(TAG, "Initializing in online mode with URL: " + currentBaseUrl);
 
@@ -176,7 +177,7 @@ public class MLModelManager {
     /**
      * Check if the device is running on an emulator
      * This helps determine which server URL to use
-     * 
+     *
      * @return true if running on an emulator, false otherwise
      */
     private boolean isEmulator() {
@@ -190,7 +191,7 @@ public class MLModelManager {
 
     /**
      * Get shared preferences for the app
-     * 
+     *
      * @return SharedPreferences instance
      */
     private android.content.SharedPreferences getPreferences() {
@@ -293,7 +294,7 @@ public class MLModelManager {
             mlModelApi.analyzeResume(filePart).enqueue(new Callback<EvaluationResult>() {
                 @Override
                 public void onResponse(@NonNull Call<EvaluationResult> call,
-                        @NonNull Response<EvaluationResult> response) {
+                                       @NonNull Response<EvaluationResult> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         Log.d(TAG, "Resume analysis successful");
                         callback.onSuccess(response.body());
@@ -370,8 +371,8 @@ public class MLModelManager {
             demoResult.setTranscription("This is a demo transcription generated for testing purposes. " +
                     "The candidate demonstrates good communication skills with appropriate technical vocabulary. " +
                     "Speech is clear and well-articulated with good cadence and minimal filler words."); // Set up demo
-                                                                                                         // fluency
-                                                                                                         // scores
+            // fluency
+            // scores
             EvaluationResult.FluentyScores fluencyScores = new EvaluationResult.FluentyScores();
             // Set mock scores between 70-90
             float fluencyScore = 75 + (float) (Math.random() * 15);
@@ -417,7 +418,7 @@ public class MLModelManager {
             mlModelApi.analyzeVideo(filePart).enqueue(new Callback<EvaluationResult>() {
                 @Override
                 public void onResponse(@NonNull Call<EvaluationResult> call,
-                        @NonNull Response<EvaluationResult> response) {
+                                       @NonNull Response<EvaluationResult> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         callback.onSuccess(response.body());
                     } else {
@@ -512,7 +513,7 @@ public class MLModelManager {
             mlModelApi.evaluateCandidate(resumePart, videoPart, cgpaPart).enqueue(new Callback<EvaluationResult>() {
                 @Override
                 public void onResponse(@NonNull Call<EvaluationResult> call,
-                        @NonNull Response<EvaluationResult> response) {
+                                       @NonNull Response<EvaluationResult> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         callback.onSuccess(response.body());
                     } else {
@@ -757,7 +758,7 @@ public class MLModelManager {
 
     /**
      * Check if the ML server is considered available
-     * 
+     *
      * @return true if the server is available, false otherwise
      */
     // public boolean isServerAvailable() {
