@@ -3,6 +3,8 @@
 A comprehensive Android application for evaluating candidate performance during interviews using real ML models.
 
 [![Live Working Video](https://github.com/user-attachments/assets/09092d3f-1bd5-4546-b01d-cd11a43e8c0d)](https://drive.google.com/file/d/16uCM3IpSQXnQujUuyF8N5LC3-885B47C/view?usp=sharing)
+
+Overleaf Link for the Project Report: https://www.overleaf.com/project/6825b4b25d201fc920f87230
 ## Overview
 
 PET is designed to assess candidates based on multiple parameters:
