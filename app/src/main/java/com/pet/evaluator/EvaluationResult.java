@@ -150,6 +150,15 @@ public class EvaluationResult {
         this.error = error;
     }
 
+    /**
+     * Set the score for resume analysis
+     * 
+     * @param score The score value
+     */
+    public void setScore(float score) {
+        this.score = score;
+    }
+
     // Safe accessors that handle null values
 
     public FluentyScores getFluencySafe() {
@@ -278,6 +287,15 @@ public class EvaluationResult {
             // Default to score if available, otherwise return 75
             return score > 0 ? score : 75;
         }
+
+        /**
+         * Set the fluency score
+         *
+         * @param score The fluency score value
+         */
+        public void setScore(float score) {
+            this.score = score;
+        }
     }
 
     /**
@@ -327,6 +345,15 @@ public class EvaluationResult {
 
         public float getAvgSophistication() {
             return avgSophistication;
+        }
+
+        /**
+         * Set the vocabulary score
+         *
+         * @param score The vocabulary score value
+         */
+        public void setScore(float score) {
+            this.score = score;
         }
     }
 }

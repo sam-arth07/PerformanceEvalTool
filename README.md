@@ -105,3 +105,22 @@ To improve model accuracy:
 2. Enhance feature extraction in the analyzer classes
 3. Experiment with different model architectures in the training scripts
 4. Update the conversion process to TFLite format as needed
+
+## Network Resilience
+
+PET is designed to handle various network conditions and connectivity issues:
+
+- **Automatic Fallbacks**: If the ML server is unavailable, the app gracefully falls back to on-device processing
+- **Timeout Handling**: The app properly handles connection timeouts with helpful user messaging
+- **Mock URI Support**: For development and testing purposes, the app supports mock URIs
+- **Offline Mode**: Continues to function with locally cached models when network is unavailable
+- **Error Recovery**: Clear error messages help diagnose and recover from connection issues
+
+A test utility (`test_network_resilience.py`) is included to help verify network resilience:
+
+```bash
+# Run the test server with 10-second delay
+python test_network_resilience.py --delay 10
+```
+
+This helps simulate slow server responses or timeouts for testing purposes.

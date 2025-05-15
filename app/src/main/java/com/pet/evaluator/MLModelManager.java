@@ -217,18 +217,18 @@ public class MLModelManager {
             EvaluationResult demoResult = new EvaluationResult();
             demoResult.setTranscription("This is a demo transcription generated for testing purposes. " +
                     "The candidate demonstrates good communication skills with appropriate technical vocabulary. " +
-                    "Speech is clear and well-articulated with good cadence and minimal filler words.");
-
-            // Set up demo fluency scores
+                    "Speech is clear and well-articulated with good cadence and minimal filler words.");            // Set up demo fluency scores
             EvaluationResult.FluentyScores fluencyScores = new EvaluationResult.FluentyScores();
             // Set mock scores between 70-90
             float fluencyScore = 75 + (float) (Math.random() * 15);
+            fluencyScores.setScore(fluencyScore / 100); // Convert to 0-1 scale
             demoResult.setFluency(fluencyScores);
 
             // Set up demo vocabulary scores
             EvaluationResult.VocabularyScores vocabScores = new EvaluationResult.VocabularyScores();
             // Set mock scores between 70-90
             float vocabScore = 80 + (float) (Math.random() * 10);
+            vocabScores.setScore(vocabScore / 100); // Convert to 0-1 scale
             demoResult.setVocabulary(vocabScores);
 
             // Return the demo result
@@ -280,19 +280,34 @@ public class MLModelManager {
                         }
                         callback.onError(errorMsgBuilder.toString());
                     }
-                }
-
-                @Override
+                }                @Override
                 public void onFailure(@NonNull Call<EvaluationResult> call, @NonNull Throwable t) {
-                    StringBuilder errorMsgBuilder = new StringBuilder("Network error: ");
-                    if (t != null && t.getMessage() != null) {
-                        errorMsgBuilder.append(t.getMessage());
+                    // Check if it's a timeout or connection issue
+                    boolean isTimeout = t instanceof java.net.SocketTimeoutException;
+                    boolean isConnectError = t instanceof java.net.ConnectException;
+                    
+                    StringBuilder errorMsgBuilder = new StringBuilder();
+                    
+                    if (isTimeout) {
+                        errorMsgBuilder.append("Server timeout: The ML server is taking too long to process the video. ");
+                        errorMsgBuilder.append("This could be due to high server load or video size. ");
+                    } else if (isConnectError) {
+                        errorMsgBuilder.append("Connection error: Cannot reach the ML analysis server. ");
+                        errorMsgBuilder.append("Please check your network connection or try again later. ");
+                        // Mark server as unavailable for future calls
+                        isServerAvailable = false;
                     } else {
-                        errorMsgBuilder.append("Unknown network error");
+                        errorMsgBuilder.append("Network error: ");
+                        if (t != null && t.getMessage() != null) {
+                            errorMsgBuilder.append(t.getMessage());
+                        } else {
+                            errorMsgBuilder.append("Unknown network error");
+                        }
                     }
-                    callback.onError(errorMsgBuilder.toString());
-                    Log.e(TAG, "Video analysis network error",
-                            t != null ? t : new Throwable("No error details available"));
+                    
+                    String errorMsg = errorMsgBuilder.toString();
+                    Log.e(TAG, "Video analysis network error: " + errorMsg, t);
+                    callback.onError(errorMsg);
                 }
             });
 
