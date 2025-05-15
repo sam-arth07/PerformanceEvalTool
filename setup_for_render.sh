@@ -9,5 +9,8 @@ ln -sf $(pwd)/tflite_models ml_models/
 # Install dependencies
 pip install -r ml_models/requirements.txt
 
+# Make sure gunicorn is installed
+pip install gunicorn
+
 # Set environment variables
 export PYTHONPATH=$PYTHONPATH:$(pwd)

@@ -1,1 +1,1 @@
-web: gunicorn --chdir ml_models api:app
+web: cd ml_models && gunicorn api:app

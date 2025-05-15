@@ -4,7 +4,7 @@ services:
       name: pet-ml-api
       env: python
       buildCommand: ./setup_for_render.sh
-      startCommand: gunicorn --chdir ml_models api:app
+      startCommand: cd ml_models && gunicorn api:app
       envVars:
           - key: PYTHON_VERSION
             value: 3.9.16
