@@ -55,12 +55,11 @@ interface MLModelApi {
  * Manager class for interfacing with Python ML models
  */
 public class MLModelManager {
-    private static final String TAG = "MLModelManager";
-    // API Base URL options
+    private static final String TAG = "MLModelManager";    // API Base URL options
     private static final String LOCAL_EMULATOR_URL = "http://10.0.2.2:5000/";
     private static final String LOCAL_DEVICE_URL = "http://127.0.0.1:5000/";
     // Make sure the URL has a trailing slash, which is required by Retrofit
-    private static final String DEMO_URL = "https://pet-ml-api-sqwo.onrender.com"; // Render.com free tier URL
+    private static final String DEMO_URL = "https://pet-ml-api-sqwo.onrender.com/"; // Render.com free tier URL
 
     // Current active URL - can be changed at runtime if needed
     private String currentBaseUrl;
@@ -88,9 +87,7 @@ public class MLModelManager {
         if (!useOfflineMode) {
             checkServerAvailabilityAsync();
         }
-    }
-
-    /**
+    }    /**
      * Set whether to use offline mode
      *
      * @param useOfflineMode true to use offline mode, false to use online mode
@@ -98,25 +95,63 @@ public class MLModelManager {
     public void setUseOfflineMode(boolean useOfflineMode) {
         // Save the preference
         getPreferences().edit().putBoolean("offline_mode_preferred", useOfflineMode).apply();
+        
+    /**
+     * Set whether to use local server instead of Render.com's server
+     * This is primarily for debugging and development purposes
+     *
+     * @param useLocalServer true to use local server (127.0.0.1 or 10.0.2.2), 
+     *                       false to use Render.com server
+     * @return true if the setting was applied and server was switched
+     */    public boolean setUseLocalServer(boolean useLocalServer) {
+        // Save the preference
+        getPreferences().edit().putBoolean("use_local_server", useLocalServer).apply();
 
-        // Update the mode
+        // Only switch if we're in online mode
+        boolean useOfflineMode = getPreferences().getBoolean("offline_mode_preferred", false);
         if (useOfflineMode) {
-            initializeOfflineMode();
+            // No effect in offline mode
+            return false;
         } else {
+            // Re-initialize with the new server setting
             initializeOnlineMode();
-
+            
             // Check if server is actually available
             checkServerAvailabilityAsync();
+            return true;
         }
-    }
-
-    /**
+    }/**
      * Get the server availability status
      *
      * @return true if the server is available, false otherwise
      */
     public boolean isServerAvailable() {
         return isServerAvailable;
+    }
+    
+    /**
+     * Set whether to use local server instead of Render.com's server
+     * This is primarily for debugging and development purposes
+     *
+     * @param useLocalServer true to use local server (127.0.0.1 or 10.0.2.2), 
+     *                       false to use Render.com server
+     * @return true if the setting was applied and server was switched
+     */
+    public boolean setUseLocalServer(boolean useLocalServer) {
+        // Save the preference
+        getPreferences().edit().putBoolean("use_local_server", useLocalServer).apply();
+        
+        // Only switch if we're in online mode
+        if (!getPreferences().getBoolean("offline_mode_preferred", false)) {
+            // Re-initialize with the new server setting
+            initializeOnlineMode();
+            
+            // Check if server is available
+            checkServerAvailabilityAsync();
+            return true;
+        }
+        
+        return false;
     }
 
     /**
@@ -130,12 +165,17 @@ public class MLModelManager {
                 .connectTimeout(5, TimeUnit.SECONDS) // Shorter connection timeout
                 .readTimeout(60, TimeUnit.SECONDS)
                 .writeTimeout(60, TimeUnit.SECONDS)
-                .build();
-
-        // Try connecting to the most likely server URL first
-        // For emulators, this is 10.0.2.2, for real devices it's usually 127.0.0.1
-        // currentBaseUrl = isEmulator() ? LOCAL_EMULATOR_URL : LOCAL_DEVICE_URL;
-        currentBaseUrl = LOCAL_DEVICE_URL;
+                .build();        // Try connecting to the remote Render.com server first as it's most reliable
+        // Fall back to local options if needed (for debugging or development)
+        if (getPreferences().getBoolean("use_local_server", false)) {
+            // For local development/testing
+            currentBaseUrl = isEmulator() ? LOCAL_EMULATOR_URL : LOCAL_DEVICE_URL;
+            Log.d(TAG, "Using local development server URL: " + currentBaseUrl);
+        } else {
+            // For production/demo use
+            currentBaseUrl = DEMO_URL;
+            Log.d(TAG, "Using production server URL: " + currentBaseUrl);
+        }
 
         Log.d(TAG, "Initializing in online mode with URL: " + currentBaseUrl);
 

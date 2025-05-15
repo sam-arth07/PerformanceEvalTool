@@ -1,7 +1,6 @@
-services:
-    # A web service running the Flask API
+services: # A web service running the Flask API
     - type: web
-      name: pet-ml-api
+      name: pet-ml-api-sqwo
       env: python
       buildCommand: chmod +x ./setup_for_render.sh ./build.sh && (./setup_for_render.sh || ./build.sh)
       startCommand: cd ml_models && gunicorn --log-file=- wsgi:app

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Camera configuration -->
+    <integer name="video_quality_high_resolution_width">1280</integer>
+    <integer name="video_quality_high_resolution_height">720</integer>
+    <integer name="video_quality_medium_resolution_width">640</integer>
+    <integer name="video_quality_medium_resolution_height">480</integer>
+    <integer name="video_bitrate_high">2500000</integer> <!-- 2.5 Mbps -->
+    <integer name="video_bitrate_medium">1500000</integer> <!-- 1.5 Mbps -->
+    <integer name="video_fps">30</integer>
+</resources>

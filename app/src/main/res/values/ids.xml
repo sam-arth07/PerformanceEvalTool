@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Camera diagnostic button ID -->
+    <item name="button_camera_diagnostic" type="id" />
+</resources>
