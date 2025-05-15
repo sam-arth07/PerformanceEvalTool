@@ -23,11 +23,13 @@ public class SharedViewModel extends AndroidViewModel {
 
     // Video data
     private final MutableLiveData<Uri> videoUri = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> isVideoProcessed = new MutableLiveData<>(false);
-
-    // Evaluation state and results
+    private final MutableLiveData<Boolean> isVideoProcessed = new MutableLiveData<>(false); // Evaluation state and
+                                                                                            // results
     private final MutableLiveData<Boolean> isEvaluationComplete = new MutableLiveData<>(false);
     private final MutableLiveData<EvaluationResult> evaluationResult = new MutableLiveData<>();
+
+    // Offline mode status
+    private final MutableLiveData<Boolean> isOfflineMode = new MutableLiveData<>(false);
 
     public SharedViewModel(@NonNull Application application) {
         super(application);
@@ -174,6 +176,29 @@ public class SharedViewModel extends AndroidViewModel {
 
         // Reset the evaluation service
         evaluationService.reset();
+    }
+
+    /**
+     * Get the offline mode status
+     * 
+     * @return LiveData for offline mode status
+     */
+    public LiveData<Boolean> getIsOfflineMode() {
+        return isOfflineMode;
+    }
+
+    /**
+     * Set the offline mode status
+     * 
+     * @param value true if offline mode is enabled, false otherwise
+     */
+    public void setIsOfflineMode(boolean value) {
+        isOfflineMode.setValue(value);
+
+        // Update EvaluationService with this setting
+        if (evaluationService != null) {
+            evaluationService.setUseOfflineMode(value);
+        }
     }
 
     @Override

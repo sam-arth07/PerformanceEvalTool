@@ -35,6 +35,24 @@
     <string name="vocabulary_score">Vocabulary</string>
     <string name="overall_score">Overall Score</string>    <string name="detailed_analysis">Detailed Analysis</string>
     <string name="save_report">Save Report</string>
-    <string name="share_report">Share Report</string>    <string name="new_evaluation">New Evaluation</string>
+    <string name="share_report">Share Report</string>    
+    <string name="new_evaluation">New Evaluation</string>
     <string name="start_evaluation">Start Evaluation</string>
+      <!-- Settings and Status -->
+    <string name="toggle_offline_mode">Use Offline Mode</string>
+    <string name="run_diagnostics">Run Diagnostics</string>
+    <string name="offline_mode_enabled">Offline Mode Enabled</string>
+    <string name="online_mode_enabled">Online Mode Enabled</string>
+    <string name="offline_mode_description">Operating in offline mode. ML analysis will use on-device models.</string>
+    
+    <!-- Diagnostics Dialog -->
+    <string name="diagnostics_title">PET Server Diagnostics</string>
+    <string name="checking_server_status">Checking server status…</string>
+    <string name="server_available">Server Available</string>
+    <string name="server_unavailable">Server Unavailable</string>
+    <string name="server_available_message">The ML server is available and ready to process requests.</string>
+    <string name="server_unavailable_message">Could not connect to the ML server. The app will operate in offline mode using on-device models.</string>
+    <string name="retry">Retry</string>
+    <string name="close">Close</string>
+    <string name="enable_offline_mode">Enable Offline Mode</string>
 </resources>

@@ -1,0 +1,11 @@
+services:
+    # A web service running the Flask API
+    - type: web
+      name: pet-ml-api
+      env: python
+      buildCommand: ./setup_for_render.sh
+      startCommand: gunicorn --chdir ml_models api:app
+      envVars:
+          - key: PYTHON_VERSION
+            value: 3.9.16
+      healthCheckPath: /health

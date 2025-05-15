@@ -2,7 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/action_offline_mode"
+        android:title="@string/toggle_offline_mode"
+        android:checkable="true"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_diagnostics"
-        android:title="Run Diagnostics"
+        android:title="@string/run_diagnostics"
         app:showAsAction="never" />
 </menu>

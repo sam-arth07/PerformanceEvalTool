@@ -61,62 +61,62 @@ This document outlines the fixes that have been implemented to resolve the issue
 
 **Problem:**
 
-- The app was experiencing `java.net.SocketTimeoutException` when attempting to upload resumes to the backend server
-- The error occurred specifically when calling `MLModelManager.analyzeResume()` method
-- The 30-second default timeout was insufficient for some network conditions or large resume files
+-   The app was experiencing `java.net.SocketTimeoutException` when attempting to upload resumes to the backend server
+-   The error occurred specifically when calling `MLModelManager.analyzeResume()` method
+-   The 30-second default timeout was insufficient for some network conditions or large resume files
 
 **Solution:**
 
-- Enhanced HTTP client configuration with customized timeouts:
-  - Increased connection timeout to 30 seconds
-  - Increased read timeout to 60 seconds
-  - Increased write timeout to 60 seconds
-- Added specific handling for different types of network errors:
-  - `SocketTimeoutException`: Server taking too long to respond
-  - `ConnectException`: Server connection failures
-- Implemented server availability tracking with an `isServerAvailable` flag
-- Enhanced fallback mechanism to offline mode when the server is unreachable
-- Improved mock data generation with more realistic simulated results
-- Added user feedback with Toast notifications when operating in offline mode
+-   Enhanced HTTP client configuration with customized timeouts:
+    -   Increased connection timeout to 30 seconds
+    -   Increased read timeout to 60 seconds
+    -   Increased write timeout to 60 seconds
+-   Added specific handling for different types of network errors:
+    -   `SocketTimeoutException`: Server taking too long to respond
+    -   `ConnectException`: Server connection failures
+-   Implemented server availability tracking with an `isServerAvailable` flag
+-   Enhanced fallback mechanism to offline mode when the server is unreachable
+-   Improved mock data generation with more realistic simulated results
+-   Added user feedback with Toast notifications when operating in offline mode
 
 **Files Modified:**
 
-- `MLModelManager.java`: Enhanced timeout settings, improved error detection
-- `EvaluationService.java`: Improved offline fallback and network status checking
-- `EvaluationResult.java`: Added missing setter methods for score values
+-   `MLModelManager.java`: Enhanced timeout settings, improved error detection
+-   `EvaluationService.java`: Improved offline fallback and network status checking
+-   `EvaluationResult.java`: Added missing setter methods for score values
 
 **Testing:**
 
-- A new test utility (`test_network_resilience.py`) was created to simulate slow server responses
-- The fix was verified by testing uploads while the test server simulated timeouts
+-   A new test utility (`test_network_resilience.py`) was created to simulate slow server responses
+-   The fix was verified by testing uploads while the test server simulated timeouts
 
 ### 4. FileNotFoundException with Mock Video URIs
 
 **Problem:**
 
-- The app crashed with `FileNotFoundException` when trying to process mock video URIs
-- This occurred because the mock URI (`content://mock/video/recording.mp4`) had no registered content provider
+-   The app crashed with `FileNotFoundException` when trying to process mock video URIs
+-   This occurred because the mock URI (`content://mock/video/recording.mp4`) had no registered content provider
 
 **Solution:**
 
-- Added special handling for URIs with the "mock" scheme in `getFileFromUri()` method
-- Implemented creation of temporary sample files for mock URIs
-- Added demo result generation to simulate ML processing for mock inputs
+-   Added special handling for URIs with the "mock" scheme in `getFileFromUri()` method
+-   Implemented creation of temporary sample files for mock URIs
+-   Added demo result generation to simulate ML processing for mock inputs
 
 **Files Modified:**
 
-- `MLModelManager.java`: Added mock URI detection and handling
-- `VideoFragment.java`: Improved video source selection with fallbacks
+-   `MLModelManager.java`: Added mock URI detection and handling
+-   `VideoFragment.java`: Improved video source selection with fallbacks
 
 ### 5. Reliability Improvements
 
 **Additional Enhancements:**
 
-- Added null safety checks when determining MIME types
-- Added proper resource cleanup in finally blocks for file operations
-- Improved error messaging for better diagnostics
-- Added more detailed logging throughout the app
-- Enhanced demo mode for development testing
+-   Added null safety checks when determining MIME types
+-   Added proper resource cleanup in finally blocks for file operations
+-   Improved error messaging for better diagnostics
+-   Added more detailed logging throughout the app
+-   Enhanced demo mode for development testing
 
 ## Enhancements Added
 

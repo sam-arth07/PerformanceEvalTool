@@ -12,6 +12,12 @@
     - Updated Kotlin stdlib version to match project requirements
     - Added exclusion rules for conflicting dependencies
     - Fixed native library conflicts with pickFirst rules
+3. **Network Timeout Handling**
+    - Added automatic server availability detection
+    - Implemented robust offline fallback mechanisms
+    - Added user-toggleable offline mode with UI indicator
+    - Enhanced error messaging for network issues
+    - Added server diagnostics tools
 
 ## Testing Steps
 
@@ -87,7 +93,47 @@ If the emulator continues to have issues:
 3. Navigate to Results tab
 4. Verify the overall evaluation score
 
-### 6. Verifying Fixes
+### 6. Testing Offline Mode Features
+
+#### Offline Mode UI
+
+1. Launch the app and observe the UI
+2. Confirm that the offline mode indicator is not visible by default
+3. Open the menu (three dots in upper right)
+4. Toggle "Use Offline Mode" option
+5. Verify the orange offline mode indicator appears at the top of the screen
+6. Toggle the option off and verify the indicator disappears
+
+#### Server Diagnostics
+
+1. From the menu, select "Run Diagnostics"
+2. If the server is available:
+    - Dialog should show "Server Available" message
+    - Option to switch to online mode should be offered if in offline mode
+3. If the server is unavailable:
+    - Dialog should show "Server Unavailable" message
+    - Option to switch to offline mode should be offered if in online mode
+
+#### Testing with Server Unavailable
+
+1. Stop the ML server (if running)
+2. Try to process a resume and video
+3. Verify that:
+    - The app detects the server is unavailable
+    - Offline mode indicator appears
+    - A toast message about offline mode is shown
+    - Analysis completes using on-device fallback models
+
+#### Sample File Intelligence
+
+1. Set the app to offline mode
+2. Process different types of sample files:
+    - Senior-level resumes and videos should receive higher scores
+    - Mid-level samples should receive moderate scores
+    - Entry-level samples should receive lower baseline scores
+3. Verify offline transcriptions include "OFFLINE ANALYSIS MODE" header
+
+### 7. Verifying Fixes
 
 To verify our fixes are working:
 
@@ -101,6 +147,11 @@ To verify our fixes are working:
     - Use an invalid resume file
     - Use an invalid video file
     - The app should gracefully handle these cases
+3. Test network transitions:
+    - Turn on airplane mode while using the app
+    - Verify the app switches to offline mode
+    - Turn off airplane mode
+    - Use the diagnostics to re-check server status
 
 ## Next Steps for Development
 
@@ -108,18 +159,26 @@ To verify our fixes are working:
 
     - Add progress indicators during processing
     - Improve error messaging for users
+    - Enhance the offline mode indicator with more details
 
 2. **Performance Optimizations**
 
     - Optimize model loading time
     - Implement caching for processed results
+    - Improve TFLite model integration for better offline results
 
 3. **Feature Enhancements**
 
     - Add support for more resume formats
     - Implement batch processing for multiple candidates
     - Add candidate comparison visualization
+    - Add periodic server reachability checks in background
 
 4. **Security Enhancements**
     - Implement secure storage for candidate data
     - Add authentication for API access
+5. **Offline Mode Enhancements**
+    - Add synchronized settings across app instances
+    - Implement more sophisticated fallback algorithms
+    - Add periodic retries to reconnect to server when in offline mode
+    - Add data synchronization when returning to online mode

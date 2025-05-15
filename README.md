@@ -110,11 +110,11 @@ To improve model accuracy:
 
 PET is designed to handle various network conditions and connectivity issues:
 
-- **Automatic Fallbacks**: If the ML server is unavailable, the app gracefully falls back to on-device processing
-- **Timeout Handling**: The app properly handles connection timeouts with helpful user messaging
-- **Mock URI Support**: For development and testing purposes, the app supports mock URIs
-- **Offline Mode**: Continues to function with locally cached models when network is unavailable
-- **Error Recovery**: Clear error messages help diagnose and recover from connection issues
+-   **Automatic Fallbacks**: If the ML server is unavailable, the app gracefully falls back to on-device processing
+-   **Timeout Handling**: The app properly handles connection timeouts with helpful user messaging
+-   **Mock URI Support**: For development and testing purposes, the app supports mock URIs
+-   **Offline Mode**: Continues to function with locally cached models when network is unavailable
+-   **Error Recovery**: Clear error messages help diagnose and recover from connection issues
 
 A test utility (`test_network_resilience.py`) is included to help verify network resilience:
 

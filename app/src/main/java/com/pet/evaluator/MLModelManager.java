@@ -55,35 +55,187 @@ interface MLModelApi {
  * Manager class for interfacing with Python ML models
  */
 public class MLModelManager {
-    private static final String TAG = "MLModelManager";
+    private static final String TAG = "MLModelManager"; // API Base URL options private static final String
+                                                        // LOCAL_EMULATOR_URL = "http://10.0.2.2:5000/";
+    private static final String LOCAL_DEVICE_URL = "http://127.0.0.1:5000/";
+    private static final String DEMO_URL = "https://pet-ml-api.onrender.com/"; // Render.com free tier URL
 
-    // API Base URL - Change this to your server URL
-    private static final String BASE_URL = "http://10.0.2.2:5000/";
+    // Current active URL - can be changed at runtime if needed
+    private String currentBaseUrl;
 
-    private final MLModelApi mlModelApi;
+    private MLModelApi mlModelApi;
     private final Context context;
-    private boolean isServerAvailable = true; // Added flag to track server availability
+    private boolean isServerAvailable = false; // Default to assuming server is unavailable
 
     public MLModelManager(Context context) {
         this.context = context;
 
-        // Configure OkHttp client with longer timeouts for ML processing
+        // Read from SharedPreferences if offline mode is preferred
+        // If offline mode is preferred or if we're in a development environment with no
+        // server
+        boolean useOfflineMode = getPreferences().getBoolean("offline_mode_preferred", false);
+
+        // Initialize with appropriate mode
+        if (useOfflineMode) {
+            initializeOfflineMode();
+        } else {
+            initializeOnlineMode();
+        }
+
+        // If online mode was selected, check if server is actually available
+        if (!useOfflineMode) {
+            checkServerAvailabilityAsync();
+        }
+    }
+
+    /**
+     * Set whether to use offline mode
+     * 
+     * @param useOfflineMode true to use offline mode, false to use online mode
+     */
+    public void setUseOfflineMode(boolean useOfflineMode) {
+        // Save the preference
+        getPreferences().edit().putBoolean("offline_mode_preferred", useOfflineMode).apply();
+
+        // Update the mode
+        if (useOfflineMode) {
+            initializeOfflineMode();
+        } else {
+            initializeOnlineMode();
+
+            // Check if server is actually available
+            checkServerAvailabilityAsync();
+        }
+    }
+
+    /**
+     * Get the server availability status
+     * 
+     * @return true if the server is available, false otherwise
+     */
+    public boolean isServerAvailable() {
+        return isServerAvailable;
+    }
+
+    /**
+     * Initialize the MLModelManager in online mode, attempting to connect to the
+     * server
+     */
+    private void initializeOnlineMode() {
+        // Configure OkHttp client with longer timeouts but shorter connection timeout
+        // Shorter connection timeout helps fail faster when server is down
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .connectTimeout(30, TimeUnit.SECONDS)
+                .connectTimeout(5, TimeUnit.SECONDS) // Shorter connection timeout
                 .readTimeout(60, TimeUnit.SECONDS)
                 .writeTimeout(60, TimeUnit.SECONDS)
                 .build();
 
+        // Try connecting to the most likely server URL first
+        // For emulators, this is 10.0.2.2, for real devices it's usually 127.0.0.1
+        currentBaseUrl = isEmulator() ? LOCAL_EMULATOR_URL : LOCAL_DEVICE_URL;
+
+        Log.d(TAG, "Initializing in online mode with URL: " + currentBaseUrl);
+
         // Configure Retrofit for API calls
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
+                .baseUrl(currentBaseUrl)
                 .client(okHttpClient)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         // Create API interface
         mlModelApi = retrofit.create(MLModelApi.class);
-    }    /**
+    }
+
+    /**
+     * Initialize the MLModelManager in offline mode
+     */
+    private void initializeOfflineMode() {
+        Log.d(TAG, "Initializing in offline mode - all analysis will use on-device models");
+        isServerAvailable = false;
+
+        // We still need to initialize Retrofit, but it won't be used
+        currentBaseUrl = "http://localhost:1234/"; // Dummy URL that won't be used
+
+        // Create a dummy client with minimal timeout to fail fast if accidentally used
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .connectTimeout(1, TimeUnit.SECONDS)
+                .build();
+
+        // Configure Retrofit for API calls (won't be used in offline mode)
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(currentBaseUrl)
+                .client(okHttpClient)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        // Create API interface (won't be used)
+        mlModelApi = retrofit.create(MLModelApi.class);
+    }
+
+    /**
+     * Check if the device is running on an emulator
+     * This helps determine which server URL to use
+     * 
+     * @return true if running on an emulator, false otherwise
+     */
+    private boolean isEmulator() {
+        // Check common emulator indicators
+        return android.os.Build.PRODUCT.contains("sdk") ||
+                android.os.Build.MODEL.contains("sdk") ||
+                android.os.Build.MODEL.toLowerCase().contains("emulator") ||
+                android.os.Build.HARDWARE.contains("goldfish") ||
+                android.os.Build.HARDWARE.contains("ranchu");
+    }
+
+    /**
+     * Get shared preferences for the app
+     * 
+     * @return SharedPreferences instance
+     */
+    private android.content.SharedPreferences getPreferences() {
+        return context.getSharedPreferences("pet_ml_preferences", Context.MODE_PRIVATE);
+    }
+
+    /**
+     * Asynchronously check if the server is available
+     * Updates the isServerAvailable flag accordingly
+     */
+    private void checkServerAvailabilityAsync() {
+        // Create a new thread to check server availability
+        new Thread(() -> {
+            try {
+                // Try to connect to the server with a very short timeout
+                OkHttpClient testClient = new OkHttpClient.Builder()
+                        .connectTimeout(2, TimeUnit.SECONDS)
+                        .readTimeout(2, TimeUnit.SECONDS)
+                        .build();
+
+                okhttp3.Request request = new okhttp3.Request.Builder()
+                        .url(currentBaseUrl)
+                        .build();
+
+                try (okhttp3.Response response = testClient.newCall(request).execute()) {
+                    isServerAvailable = response.isSuccessful();
+                    Log.d(TAG, "Server availability check: " + (isServerAvailable ? "AVAILABLE" : "UNAVAILABLE"));
+
+                    // If server is unavailable, fall back to offline mode
+                    if (!isServerAvailable) {
+                        initializeOfflineMode();
+                    }
+                }
+            } catch (Exception e) {
+                // If any exception occurs, server is considered unavailable
+                isServerAvailable = false;
+                Log.d(TAG, "Server unavailable due to exception: " + e.getMessage());
+
+                // Since server is unavailable, switch to offline mode
+                initializeOfflineMode();
+            }
+        }).start();
+    }
+
+    /**
      * Analyze a resume file
      *
      * @param resumeUri URI of the resume file
@@ -93,22 +245,22 @@ public class MLModelManager {
         // Special handling for mock URIs in demo mode
         if (resumeUri != null && "mock".equals(resumeUri.getScheme())) {
             Log.d(TAG, "Mock resume URI detected. Using demo mode with synthetic results.");
-            
+
             // Create a synthetic result for demo purposes
             EvaluationResult demoResult = new EvaluationResult();
             // Set demo score between 70-90%
-            float scoreValue = 70 + (float)(Math.random() * 20);
+            float scoreValue = 70 + (float) (Math.random() * 20);
             demoResult.setScore(scoreValue / 100);
             // Set demo skill count between 8-15
-            demoResult.setSkillCount((int)(8 + Math.random() * 7));
+            demoResult.setSkillCount((int) (8 + Math.random() * 7));
             // Set demo experience years between 2-6
-            demoResult.setExperienceYears(2.0f + (float)(Math.random() * 4.0f));
-            
+            demoResult.setExperienceYears(2.0f + (float) (Math.random() * 4.0f));
+
             // Return demo result
             callback.onSuccess(demoResult);
             return;
         }
-        
+
         try {
             // Convert URI to file
             File resumeFile = getFileFromUri(resumeUri);
@@ -134,8 +286,8 @@ public class MLModelManager {
                     "file", resumeFile.getName(), requestFile);
 
             // Log request details for debugging
-            Log.d(TAG, "Sending resume analysis request for file: " + resumeFile.getName() + 
-                  " (size: " + resumeFile.length() + " bytes)");
+            Log.d(TAG, "Sending resume analysis request for file: " + resumeFile.getName() +
+                    " (size: " + resumeFile.length() + " bytes)");
 
             // Make API call
             mlModelApi.analyzeResume(filePart).enqueue(new Callback<EvaluationResult>() {
@@ -169,9 +321,9 @@ public class MLModelManager {
                     // Check if it's a timeout or connection issue
                     boolean isTimeout = t instanceof java.net.SocketTimeoutException;
                     boolean isConnectError = t instanceof java.net.ConnectException;
-                    
+
                     StringBuilder errorMsgBuilder = new StringBuilder();
-                    
+
                     if (isTimeout) {
                         errorMsgBuilder.append("Server timeout: The ML server is taking too long to respond. ");
                         errorMsgBuilder.append("This could be due to high server load or network issues. ");
@@ -188,7 +340,7 @@ public class MLModelManager {
                             errorMsgBuilder.append("Unknown network error");
                         }
                     }
-                    
+
                     String errorMsg = errorMsgBuilder.toString();
                     Log.e(TAG, "Resume analysis network error: " + errorMsg, t);
                     callback.onError(errorMsg);
@@ -217,7 +369,9 @@ public class MLModelManager {
             EvaluationResult demoResult = new EvaluationResult();
             demoResult.setTranscription("This is a demo transcription generated for testing purposes. " +
                     "The candidate demonstrates good communication skills with appropriate technical vocabulary. " +
-                    "Speech is clear and well-articulated with good cadence and minimal filler words.");            // Set up demo fluency scores
+                    "Speech is clear and well-articulated with good cadence and minimal filler words."); // Set up demo
+                                                                                                         // fluency
+                                                                                                         // scores
             EvaluationResult.FluentyScores fluencyScores = new EvaluationResult.FluentyScores();
             // Set mock scores between 70-90
             float fluencyScore = 75 + (float) (Math.random() * 15);
@@ -280,16 +434,19 @@ public class MLModelManager {
                         }
                         callback.onError(errorMsgBuilder.toString());
                     }
-                }                @Override
+                }
+
+                @Override
                 public void onFailure(@NonNull Call<EvaluationResult> call, @NonNull Throwable t) {
                     // Check if it's a timeout or connection issue
                     boolean isTimeout = t instanceof java.net.SocketTimeoutException;
                     boolean isConnectError = t instanceof java.net.ConnectException;
-                    
+
                     StringBuilder errorMsgBuilder = new StringBuilder();
-                    
+
                     if (isTimeout) {
-                        errorMsgBuilder.append("Server timeout: The ML server is taking too long to process the video. ");
+                        errorMsgBuilder
+                                .append("Server timeout: The ML server is taking too long to process the video. ");
                         errorMsgBuilder.append("This could be due to high server load or video size. ");
                     } else if (isConnectError) {
                         errorMsgBuilder.append("Connection error: Cannot reach the ML analysis server. ");
@@ -304,7 +461,7 @@ public class MLModelManager {
                             errorMsgBuilder.append("Unknown network error");
                         }
                     }
-                    
+
                     String errorMsg = errorMsgBuilder.toString();
                     Log.e(TAG, "Video analysis network error: " + errorMsg, t);
                     callback.onError(errorMsg);
@@ -410,9 +567,9 @@ public class MLModelManager {
         if ("mock".equals(uri.getScheme())) {
             Log.d(TAG, "Using sample file for mock URI: " + uri);
 
-            // For mock videos, use a sample video from resources or assets if available
-            // Or use a simple dummy file if no sample is available
             String mockType = uri.getPath();
+
+            // For mock videos, use a sample video from resources or assets if available
             if (mockType != null && mockType.contains("video")) {
                 // Use a sample video from the sample_data directory if possible
                 File externalDir = new File(context.getExternalFilesDir(null), "sample_videos");
@@ -432,6 +589,35 @@ public class MLModelManager {
                 }
 
                 return sampleFile;
+            }
+            // For mock resumes, create or use a sample resume file
+            else if (mockType != null && mockType.contains("resume")) {
+                // Create a directory for sample resumes
+                File externalDir = new File(context.getExternalFilesDir(null), "sample_resumes");
+                if (!externalDir.exists()) {
+                    externalDir.mkdirs();
+                }
+
+                File sampleFile = new File(externalDir, "mock_resume.pdf");
+
+                // If we don't have a sample file, create one with some dummy content
+                if (!sampleFile.exists()) {
+                    try (FileOutputStream out = new FileOutputStream(sampleFile)) {
+                        // Create a simple PDF-like header (not a valid PDF, just for testing)
+                        String dummyContent = "%PDF-1.4\n% Mock Resume for Testing\n1 0 obj\n<< /Type /Catalog >>\nendobj\n%%EOF";
+                        out.write(dummyContent.getBytes());
+                    }
+                }
+
+                return sampleFile;
+            }
+            // For any other mock URIs, create a generic test file
+            else {
+                File file = new File(context.getCacheDir(), "mock_document.txt");
+                try (FileOutputStream out = new FileOutputStream(file)) {
+                    out.write("This is a mock file created for testing purposes.".getBytes());
+                }
+                return file;
             }
         }
 
@@ -574,9 +760,9 @@ public class MLModelManager {
      * 
      * @return true if the server is available, false otherwise
      */
-    public boolean isServerAvailable() {
-        return isServerAvailable;
-    }
+    // public boolean isServerAvailable() {
+    // return isServerAvailable;
+    // }
 
     /**
      * Callback interface for ML model evaluations
