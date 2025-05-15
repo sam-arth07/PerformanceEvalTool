@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Performance Evaluation Tool</string>
+    <string name="title_home">Home</string>
+    <string name="title_resume">Resume</string>
+    <string name="title_video">Video</string>
+    <string name="title_results">Results</string>
+    
+    <!-- Home Fragment -->
+    <string name="welcome_text">Welcome to Performance Evaluation Tool</string>
+    <string name="instruction_text">Please complete all three stages of evaluation:</string>
+    <string name="upload_resume_instruction">1. Upload candidate resume</string>
+    <string name="enter_cgpa_instruction">2. Enter academic CGPA</string>
+    <string name="record_video_instruction">3. Record or upload introduction video</string>
+    <string name="view_results_instruction">4. View comprehensive evaluation</string>
+    
+    <!-- Resume Fragment -->
+    <string name="upload_resume_button">Upload Resume</string>
+    <string name="enter_cgpa">Enter CGPA (0.0 - 10.0):</string>
+    <string name="save_resume_info">Save Information</string>
+    <string name="resume_uploaded_success">Resume uploaded successfully</string>
+    <string name="invalid_cgpa">Please enter a valid CGPA between 0.0 and 10.0</string>
+    
+    <!-- Video Fragment -->
+    <string name="record_video">Record Video</string>
+    <string name="upload_video">Upload Video</string>
+    <string name="video_instruction">Please record yourself speaking in English for 1-2 minutes, introducing yourself and explaining why you are a good fit for the position</string>
+    <string name="video_uploaded_success">Video uploaded successfully</string>
+    <string name="video_processing">Processing video, please wait...</string>
+      <!-- Results Fragment -->
+    <string name="results_title">Candidate Evaluation Results</string>
+    <string name="resume_score">Resume Score</string>
+    <string name="academic_score">Academic Score</string>
+    <string name="english_fluency">English Fluency</string>
+    <string name="vocabulary_score">Vocabulary</string>
+    <string name="overall_score">Overall Score</string>    <string name="detailed_analysis">Detailed Analysis</string>
+    <string name="save_report">Save Report</string>
+    <string name="share_report">Share Report</string>    <string name="new_evaluation">New Evaluation</string>
+    <string name="start_evaluation">Start Evaluation</string>
+</resources>

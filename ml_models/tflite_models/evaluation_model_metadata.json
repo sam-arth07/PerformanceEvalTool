@@ -1,0 +1,20 @@
+{
+  "input_shape": [
+    4
+  ],
+  "input_dtype": "float32",
+  "output_shape": [
+    1
+  ],
+  "output_dtype": "float32",
+  "input_names": [
+    "resume_score",
+    "academic_score",
+    "fluency_score",
+    "vocabulary_score"
+  ],
+  "output_names": [
+    "overall_score"
+  ],
+  "version": "1.0"
+}

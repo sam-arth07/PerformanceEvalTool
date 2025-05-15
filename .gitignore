@@ -1,0 +1,4 @@
+# Ignore build artifacts
+/app/build/
+/*.apk
+*.hprof

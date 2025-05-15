@@ -1,0 +1,70 @@
+{
+  "models": {
+    "resume_model": {
+      "input_shape": [
+        5
+      ],
+      "input_dtype": "float32",
+      "output_shape": [
+        1
+      ],
+      "output_dtype": "float32",
+      "input_names": [
+        "skills",
+        "experience",
+        "education",
+        "achievements",
+        "relevance"
+      ],
+      "output_names": [
+        "score"
+      ],
+      "version": "1.0"
+    },
+    "video_model": {
+      "input_shape": [
+        6
+      ],
+      "input_dtype": "float32",
+      "output_shape": [
+        2
+      ],
+      "output_dtype": "float32",
+      "input_names": [
+        "speech_rate",
+        "pause_frequency",
+        "filler_frequency",
+        "vocabulary_diversity",
+        "pronunciation",
+        "grammar"
+      ],
+      "output_names": [
+        "fluency_score",
+        "vocabulary_score"
+      ],
+      "version": "1.0"
+    },
+    "evaluation_model": {
+      "input_shape": [
+        4
+      ],
+      "input_dtype": "float32",
+      "output_shape": [
+        1
+      ],
+      "output_dtype": "float32",
+      "input_names": [
+        "resume_score",
+        "academic_score",
+        "fluency_score",
+        "vocabulary_score"
+      ],
+      "output_names": [
+        "overall_score"
+      ],
+      "version": "1.0"
+    }
+  },
+  "app_version": "1.0.0",
+  "compatible_android_api": 21
+}
