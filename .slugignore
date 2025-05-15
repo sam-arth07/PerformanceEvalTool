@@ -1,0 +1,11 @@
+# Exclude these files/directories from deployment
+
+/app/
+/gradle/
+/.idea/
+/.gradle/
+/.vscode/
+_.hprof
+/sample_data/
+_.md
+!README.md

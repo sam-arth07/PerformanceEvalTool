@@ -3,9 +3,11 @@ services:
     - type: web
       name: pet-ml-api
       env: python
-      buildCommand: ./setup_for_render.sh
-      startCommand: cd ml_models && gunicorn api:app
+      buildCommand: chmod +x ./setup_for_render.sh ./build.sh && (./setup_for_render.sh || ./build.sh)
+      startCommand: cd ml_models && gunicorn --log-file=- wsgi:app
       envVars:
           - key: PYTHON_VERSION
             value: 3.9.16
+          - key: PYTHONPATH
+            value: .:/app
       healthCheckPath: /health

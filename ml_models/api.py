@@ -9,10 +9,21 @@ import time
 from flask import Flask, jsonify, request
 from werkzeug.utils import secure_filename
 
-sys.path.append(os.path.abspath('..'))
-from evaluation.candidate_evaluator import CandidateEvaluator
-from resume_analysis.resume_analyzer import ResumeAnalyzer
-from video_analysis.video_analyzer import VideoAnalyzer
+# Add parent directory to path to help with imports
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir)
+sys.path.insert(0, current_dir)
+
+try:
+    from ml_models.evaluation.candidate_evaluator import CandidateEvaluator
+    from ml_models.resume_analysis.resume_analyzer import ResumeAnalyzer
+    from ml_models.video_analysis.video_analyzer import VideoAnalyzer
+except ImportError:
+    # Local development fallback
+    from evaluation.candidate_evaluator import CandidateEvaluator
+    from resume_analysis.resume_analyzer import ResumeAnalyzer
+    from video_analysis.video_analyzer import VideoAnalyzer
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, 

@@ -55,9 +55,11 @@ interface MLModelApi {
  * Manager class for interfacing with Python ML models
  */
 public class MLModelManager {
-    private static final String TAG = "MLModelManager"; // API Base URL options private static final String
-    // LOCAL_EMULATOR_URL = "http://10.0.2.2:5000/";
+    private static final String TAG = "MLModelManager";
+    // API Base URL options
+    private static final String LOCAL_EMULATOR_URL = "http://10.0.2.2:5000/";
     private static final String LOCAL_DEVICE_URL = "http://127.0.0.1:5000/";
+    // Make sure the URL has a trailing slash, which is required by Retrofit
     private static final String DEMO_URL = "https://pet-ml-api-sqwo.onrender.com"; // Render.com free tier URL
 
     // Current active URL - can be changed at runtime if needed
@@ -132,7 +134,7 @@ public class MLModelManager {
 
         // Try connecting to the most likely server URL first
         // For emulators, this is 10.0.2.2, for real devices it's usually 127.0.0.1
-//        currentBaseUrl = isEmulator() ? LOCAL_EMULATOR_URL : LOCAL_DEVICE_URL;
+        // currentBaseUrl = isEmulator() ? LOCAL_EMULATOR_URL : LOCAL_DEVICE_URL;
         currentBaseUrl = LOCAL_DEVICE_URL;
 
         Log.d(TAG, "Initializing in online mode with URL: " + currentBaseUrl);
@@ -294,7 +296,7 @@ public class MLModelManager {
             mlModelApi.analyzeResume(filePart).enqueue(new Callback<EvaluationResult>() {
                 @Override
                 public void onResponse(@NonNull Call<EvaluationResult> call,
-                                       @NonNull Response<EvaluationResult> response) {
+                        @NonNull Response<EvaluationResult> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         Log.d(TAG, "Resume analysis successful");
                         callback.onSuccess(response.body());
@@ -418,7 +420,7 @@ public class MLModelManager {
             mlModelApi.analyzeVideo(filePart).enqueue(new Callback<EvaluationResult>() {
                 @Override
                 public void onResponse(@NonNull Call<EvaluationResult> call,
-                                       @NonNull Response<EvaluationResult> response) {
+                        @NonNull Response<EvaluationResult> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         callback.onSuccess(response.body());
                     } else {
@@ -513,7 +515,7 @@ public class MLModelManager {
             mlModelApi.evaluateCandidate(resumePart, videoPart, cgpaPart).enqueue(new Callback<EvaluationResult>() {
                 @Override
                 public void onResponse(@NonNull Call<EvaluationResult> call,
-                                       @NonNull Response<EvaluationResult> response) {
+                        @NonNull Response<EvaluationResult> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         callback.onSuccess(response.body());
                     } else {
