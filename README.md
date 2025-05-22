@@ -4,7 +4,8 @@ A comprehensive Android application for evaluating candidate performance during 
 
 [![Live Working Video](https://github.com/user-attachments/assets/09092d3f-1bd5-4546-b01d-cd11a43e8c0d)](https://drive.google.com/file/d/1soBkk-BFoFTxkaIB4Rg-ydKMeg68UbCO/view?usp=sharing)
 
-Overleaf Link for the Project Report: https://www.overleaf.com/project/6825b4b25d201fc920f87230
+Overleaf Link for the Project Report: https://www.overleaf.com/project/682343f6ce733c6c2138be45
+
 ## Overview
 
 PET is designed to assess candidates based on multiple parameters:
